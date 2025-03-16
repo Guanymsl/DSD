@@ -1,3 +1,6 @@
+`include '../1-ALU/1_assign/alu_assign.v'
+`include '../2-RegisterFile/register_file.v'
+
 module simple_calculator(
     Clk,
     WEN,
