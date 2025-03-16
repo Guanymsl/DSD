@@ -27,6 +27,7 @@ module alu_always_tb;
     initial begin
         // initialization
         err_count = 0;
+        ctrl = 4'b0000; x = 8'b00000000; y = 8'b00000000;
 
         #(`CYCLE*0.2)
         $display( "Testing -1 + 1" );
