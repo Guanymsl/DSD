@@ -23,6 +23,9 @@ module alu_always_tb;
         $fsdbDumpvars;
     end
 
+    // clock generation
+    always#(`HCYCLE) Clk = ~Clk;
+
     integer err_count;
     initial begin
         // initialization
