@@ -40,7 +40,7 @@ module alu_always_tb;
         #(`HCYCLE)
 
         #(`CYCLE*0.2)
-        $display( "Testing -1 - (-1)" );
+        $display( "Testing 0 - 1" );
         ctrl = 4'b0001; x = 8'b00000000; y = 8'b00000001;
         #(`CYCLE*0.3)
         if( out==8'b11111111 && carry==1  ) $display( "    .... passed." );

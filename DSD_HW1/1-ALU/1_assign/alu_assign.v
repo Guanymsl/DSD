@@ -27,8 +27,5 @@ module alu_assign(
                           (ctrl == 4'b1011) ? {x[0], x[7:1]} :
                           (ctrl == 4'b1100) ? (x == y) ? 8'd1 : 8'd0 :
                           {1'b0, 8'b00000000};
-    always @(*) begin
-        $display( "%b, %b", carry, out);
-    end
 
 endmodule
