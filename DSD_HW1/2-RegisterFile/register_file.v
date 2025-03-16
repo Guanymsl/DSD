@@ -8,23 +8,25 @@ module register_file(
     busX ,
     busY
 );
-input        Clk, WEN;
-input  [2:0] RW, RX, RY;
-input  [7:0] busW;
-output [7:0] busX, busY;
-    
-// write your design here, you can delcare your own wires and regs. 
-// The code below is just an eaxmple template
-reg [7:0] r0_w, r1_w, r2_w, r3_w, r4_w, r5_w, r6_w, r7_w;
-reg [7:0] r0_r, r1_r, r2_r, r3_r, r4_r, r5_r, r6_r, r7_r;
+    input        Clk, WEN;
+    input  [2:0] RW, RX, RY;
+    input  [7:0] busW;
+    output [7:0] busX, busY;
 
-    
-always@(*) begin
+    reg  [7:0] register [7:0];
+    wire [7:0] readX;
+    wire [7:0] readY;
 
-end
+    assign readX = register[RX];
+    assign readY = register[RY];
 
-always@(posedge Clk) begin
-
-end	
+    always @(posedge Clk) begin
+        register[0] <= 8'b0;
+        busX <= readX;
+        busY <= readY;
+        if (WEN && RW != 3'b000) begin
+            register[RW] <= busW;
+        end
+    end
 
 endmodule

@@ -8,7 +8,7 @@ module register_file_tb;
     reg  [2:0] RW, RX, RY;
     reg  [7:0] busW;
     wire [7:0] busX, busY;
-    
+
     // instantiate the design-under-test
     register_file rf(
         Clk  ,
