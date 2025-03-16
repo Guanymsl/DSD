@@ -22,7 +22,6 @@ module register_file(
         register[0] <= 8'b0;
         if (WEN && RW != 3'b000) begin
             register[RW] <= busW;
-            $display( "    %b", busW);
         end
     end
 
