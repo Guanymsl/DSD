@@ -34,7 +34,7 @@ module alu_always(
             4'b1001: out_r = {x[7], x[7:1]};
             4'b1010: out_r = {x[6:0], x[7]};
             4'b1011: out_r = {x[0], x[7:1]};
-            4'b1100: out_r = (x == y);
+            4'b1100: out_r = (x == y) ? 8'd1 : 8'd0;
             default: out_r = 8'b00000000;
         endcase
     end

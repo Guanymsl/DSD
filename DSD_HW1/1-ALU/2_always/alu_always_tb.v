@@ -18,23 +18,186 @@ module alu_always_tb;
         out
     );
 
-   initial begin
-       $fsdbDumpfile("alu_always.fsdb");
-       $fsdbDumpvars;
-   end
-
     initial begin
-        ctrl = 4'b1101;
-        x    = 8'd0;
-        y    = 8'd0;
+        $fsdbDumpfile("alu_always.fsdb");
+        $fsdbDumpvars;
+    end
 
-        #(`CYCLE);
-        // 0100 boolean not
-        ctrl = 4'b0100;
+    integer err_count;
+    initial begin
+        // initialization
+        err_count = 0;
 
-        #(`HCYCLE);
-        if( out == 8'b1111_1111 ) $display( "PASS --- 0100 boolean not" );
-        else $display( "FAIL --- 0100 boolean not" );
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        #(`CYCLE*0.2)
+        $display( "1: store multiplicand A=%2d in REG#1", A );
+        $display( "    [REG#1 = add %b REG#0]", A );
+        ctrl = 4'b0000; x = 1'b0; y = A;
+        #(`CYCLE*0.3)
+        if( out== && carry==0 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, A );
+        end
+        #(`HCYCLE)
+
+        if( err_count==0 ) begin
+            $display("****************************        /|__/|");
+            $display("**                        **      / O,O  |");
+            $display("**   Congratulations !!   **    /_____   |");
+            $display("** All Patterns Passed!!  **   /^ ^ ^ \\  |");
+            $display("**                        **  |^ ^ ^ ^ |w|");
+            $display("****************************   \\m___m__|_|");
+        end
+        else begin
+            $display("**************************** ");
+            $display("           Failed ...        ");
+            $display("     Total %2d Errors ...     ", err_count );
+            $display("**************************** ");
+        end
 
         // finish tb
         #(`CYCLE) $finish;

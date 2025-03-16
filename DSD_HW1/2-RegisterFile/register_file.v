@@ -14,18 +14,15 @@ module register_file(
     output [7:0] busX, busY;
 
     reg  [7:0] register [7:0];
-    wire [7:0] readX;
-    wire [7:0] readY;
 
-    assign readX = register[RX];
-    assign readY = register[RY];
+    assign busX = register[RX];
+    assign busY = register[RY];
 
     always @(posedge Clk) begin
         register[0] <= 8'b0;
-        busX <= readX;
-        busY <= readY;
         if (WEN && RW != 3'b000) begin
             register[RW] <= busW;
+            $display( "    %b", busW);
         end
     end
 

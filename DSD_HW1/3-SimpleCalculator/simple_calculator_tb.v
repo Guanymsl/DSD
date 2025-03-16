@@ -32,10 +32,10 @@ module simple_calculator_tb;
        $fsdbDumpfile("simple_calc.fsdb");
        $fsdbDumpvars;
     end
-    
+
     // clock generation
     always#(`HCYCLE) Clk = ~Clk;
-    
+
     // test pattern
     parameter A = {4'd0,4'd13};
     parameter B = {4'd0,4'd12};

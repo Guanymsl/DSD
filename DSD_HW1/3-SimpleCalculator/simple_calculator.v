@@ -1,5 +1,5 @@
-`include '../1-ALU/1_assign/alu_assign.v'
-`include '../2-RegisterFile/register_file.v'
+`include "../1-ALU/1_assign/alu_assign.v"
+`include "../2-RegisterFile/register_file.v"
 
 module simple_calculator(
     Clk,
@@ -25,29 +25,29 @@ module simple_calculator(
 
 // declaration of wire/reg
     wire [7:0] busX;
+    wire [7:0] alu_in;
     wire [7:0] alu_out;
-    wire [7:0] write_data;
 
 // submodule instantiation
-    assign write_data = (Sel) ? alu_out : DataIn;
+    assign alu_in = (Sel) ? busX : DataIn;
+
+    alu_assign alu(
+        .ctrl(Ctrl),
+        .x(alu_in),
+        .y(busY),
+        .carry(Carry),
+        .out(alu_out)
+    );
 
     register_file reg_file(
         .Clk(Clk),
         .WEN(WEN),
         .RW(RW),
-        .busW(write_data),
+        .busW(alu_out),
         .RX(RX),
         .RY(RY),
         .busX(busX),
         .busY(busY)
-    );
-
-    alu_assign alu (
-        .ctrl(Ctrl),
-        .x(busX),
-        .y(busY),
-        .carry(Carry),
-        .out(alu_out)
     );
 
 endmodule
