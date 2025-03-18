@@ -9,13 +9,13 @@ module alu_assign_tb;
     reg  [7:0] y;
     wire       carry;
     wire [7:0] out;
-    
+
     alu_assign alu_assign(
         ctrl     ,
         x        ,
         y        ,
         carry    ,
-        out  
+        out
     );
 
    initial begin
@@ -27,15 +27,15 @@ module alu_assign_tb;
         ctrl = 4'b1101;
         x    = 8'd0;
         y    = 8'd0;
-        
+
         #(`CYCLE);
         // 0100 boolean not
         ctrl = 4'b0100;
-        
+
         #(`HCYCLE);
         if( out == 8'b1111_1111 ) $display( "PASS --- 0100 boolean not" );
         else $display( "FAIL --- 0100 boolean not" );
-        
+
         // finish tb
         #(`CYCLE) $finish;
     end
