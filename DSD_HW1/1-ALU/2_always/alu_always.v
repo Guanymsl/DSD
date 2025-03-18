@@ -13,7 +13,7 @@ module alu_always(
     output       carry;
     output [7:0] out;
 
-    reg [7:0] signed out_r;
+    reg signed [7:0] out_r;
     reg              carry_r;
 
     assign carry = carry_r;
