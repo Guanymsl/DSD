@@ -55,10 +55,10 @@ module alu_always_tb;
         $display( "Testing AND" );
         ctrl = 4'b0010; x = 8'b00000101; y = 8'b00000011;
         #(`CYCLE*0.3)
-        if( out==8'b00000001 ) $display( "    .... passed." );
+        if( out==8'b00000001 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000001 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000001 );
         end
         #(`HCYCLE)
 
@@ -66,10 +66,10 @@ module alu_always_tb;
         $display( "Testing OR" );
         ctrl = 4'b0011; x = 8'b00000101; y = 8'b00000011;
         #(`CYCLE*0.3)
-        if( out==8'b00000111 ) $display( "    .... passed." );
+        if( out==8'b00000111 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000111 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000111 );
         end
         #(`HCYCLE)
 
@@ -77,10 +77,10 @@ module alu_always_tb;
         $display( "Testing NOT" );
         ctrl = 4'b0100; x = 8'b00000001; y = 8'b00000000;
         #(`CYCLE*0.3)
-        if( out==8'b11111110 ) $display( "    .... passed." );
+        if( out==8'b11111110 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b11111110 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b011111110 );
         end
         #(`HCYCLE)
 
@@ -88,10 +88,10 @@ module alu_always_tb;
         $display( "Testing XOR" );
         ctrl = 4'b0101; x = 8'b00000101; y = 8'b00000011;
         #(`CYCLE*0.3)
-        if( out==8'b00000110 ) $display( "    .... passed." );
+        if( out==8'b00000110 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000110 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000110 );
         end
         #(`HCYCLE)
 
@@ -99,10 +99,10 @@ module alu_always_tb;
         $display( "Testing NOR" );
         ctrl = 4'b0110; x = 8'b00000101; y = 8'b00000011;
         #(`CYCLE*0.3)
-        if( out==8'b11111000 ) $display( "    .... passed." );
+        if( out==8'b11111000 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b11111000 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b011111000 );
         end
         #(`HCYCLE)
 
@@ -110,10 +110,10 @@ module alu_always_tb;
         $display( "Shift left" );
         ctrl = 4'b0111; x = 8'b00000001; y = 8'b00000001;
         #(`CYCLE*0.3)
-        if( out==8'b00000010 ) $display( "    .... passed." );
+        if( out==8'b00000010 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000010 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000010 );
         end
         #(`HCYCLE)
 
@@ -121,10 +121,10 @@ module alu_always_tb;
         $display( "Shift right" );
         ctrl = 4'b1000; x = 8'b00000001; y = 8'b10000000;
         #(`CYCLE*0.3)
-        if( out==8'b01000000 ) $display( "    .... passed." );
+        if( out==8'b01000000 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b01000000 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b001000000 );
         end
         #(`HCYCLE)
 
@@ -132,10 +132,10 @@ module alu_always_tb;
         $display( "Shift Right Arithmetic" );
         ctrl = 4'b1001; x = 8'b10000000; y = 8'b00000000;
         #(`CYCLE*0.3)
-        if( out==8'b11000000 ) $display( "    .... passed." );
+        if( out==8'b11000000 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b11000000 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b011000000 );
         end
         #(`HCYCLE)
 
@@ -143,10 +143,10 @@ module alu_always_tb;
         $display( "Rotate Left" );
         ctrl = 4'b1010; x = 8'b11000000; y = 8'b00000000;
         #(`CYCLE*0.3)
-        if( out==8'b10000001 ) $display( "    .... passed." );
+        if( out==8'b10000001 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b10000001 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b010000001 );
         end
         #(`HCYCLE)
 
@@ -154,10 +154,10 @@ module alu_always_tb;
         $display( "Rotate Right" );
         ctrl = 4'b1011; x = 8'b10000001; y = 8'b00000000;
         #(`CYCLE*0.3)
-        if( out==8'b11000000 ) $display( "    .... passed." );
+        if( out==8'b11000000 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b11000000 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b011000000 );
         end
         #(`HCYCLE)
 
@@ -165,10 +165,10 @@ module alu_always_tb;
         $display( "Equal" );
         ctrl = 4'b1100; x = 8'b11111111; y = 8'b11111111;
         #(`CYCLE*0.3)
-        if( out==8'b00000001 ) $display( "    .... passed." );
+        if( out==8'b00000001 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000001 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000001 );
         end
         #(`HCYCLE)
 
@@ -176,10 +176,10 @@ module alu_always_tb;
         $display( "Not Equal" );
         ctrl = 4'b1100; x = 8'b00000000; y = 8'b11111111;
         #(`CYCLE*0.3)
-        if( out==8'b00000000 ) $display( "    .... passed." );
+        if( out==8'b00000000 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000000 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000000 );
         end
         #(`HCYCLE)
 
