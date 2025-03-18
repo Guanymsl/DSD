@@ -50,9 +50,6 @@ module register_file_tb;
         Clk = 1'b1;
         err_count = 0;
 
-        // 4-bit x 4-bit unsigned multiplication
-        $display( "4-bit x 4-bit unsigned multiplication" );
-
         #(`CYCLE*0.2)
         $display( "1: store multiplicand A=%2d in REG#1", A );
         $display( "    [REG#1 = add %b REG#0]", A );
