@@ -22,7 +22,7 @@ module alu_always(
     always @(*) begin
         carry_r = 1'b0;
         case (ctrl)
-            4'b0000: {carry_r, out_r} = $signed(x) + $signed(y);
+            4'b0000: {carry_r, out_r} = {1'b0, $signed(x)} + {1'b0, $signed(y)};
             4'b0001: {carry_r, out_r} = $signed(x) - $signed(y);
             4'b0010: out_r = x & y;
             4'b0011: out_r = x | y;
