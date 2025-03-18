@@ -1,16 +1,16 @@
-//always block tb
+//continuous assignment tb
 `timescale 1ns/10ps
-`define CYCLE	10
-`define HCYCLE	5
+`define CYCLE   10
+`define HCYCLE  5
 
-module alu_always_tb;
+module alu_assign_tb;
     reg  [3:0] ctrl;
     reg  [7:0] x;
     reg  [7:0] y;
     wire       carry;
     wire [7:0] out;
 
-    alu_always alu_always(
+    alu_assign alu_assign(
         ctrl     ,
         x        ,
         y        ,
@@ -19,7 +19,7 @@ module alu_always_tb;
     );
 
     initial begin
-        $fsdbDumpfile("alu_always.fsdb");
+        $fsdbDumpfile("alu_assign.fsdb");
         $fsdbDumpvars;
     end
 
@@ -172,6 +172,17 @@ module alu_always_tb;
         end
         #(`HCYCLE)
 
+        #(`CYCLE*0.2)
+        $display( "Not Equal" );
+        ctrl = 4'b1100; x = 8'b00000000; y = 8'b11111111;
+        #(`CYCLE*0.3)
+        if( out==8'b00000000 ) $display( "    .... passed." );
+        else begin
+            err_count = err_count+1;
+            $display( "    .... failed, design(%b) != expected(%b)", out, 8'b00000000 );
+        end
+        #(`HCYCLE)
+
         if( err_count==0 ) begin
             $display("****************************        /|__/|");
             $display("**                        **      / O,O  |");
@@ -190,4 +201,5 @@ module alu_always_tb;
         // finish tb
         #(`CYCLE) $finish;
     end
+
 endmodule

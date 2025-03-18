@@ -13,8 +13,9 @@ module alu_assign(
     output       carry;
     output [7:0] out;
 
-    assign {carry, out} = (ctrl == 4'b0000) ? x + y :
-                          (ctrl == 4'b0001) ? x - y :
+    assign {carry, out} = (ctrl == 4'b0000) ? $signed(x) + $signed(y) :
+                          (ctrl == 4'b0001) ? $signed(x) - $signed(y) :
+                          {1'b0,
                           (ctrl == 4'b0010) ? x & y :
                           (ctrl == 4'b0011) ? x | y :
                           (ctrl == 4'b0100) ? ~x :
@@ -25,7 +26,7 @@ module alu_assign(
                           (ctrl == 4'b1001) ? {x[7], x[7:1]} :
                           (ctrl == 4'b1010) ? {x[6:0], x[7]} :
                           (ctrl == 4'b1011) ? {x[0], x[7:1]} :
-                          (ctrl == 4'b1100) ? (x == y) ? 8'd1 : 8'd0 :
-                          {1'b0, 8'b00000000};
+                          (ctrl == 4'b1100) ? (x == y ? 8'd1 : 8'd0) :
+                          8'b00000000};
 
 endmodule
