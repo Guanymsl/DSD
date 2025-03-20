@@ -33,10 +33,10 @@ module alu_always_tb;
         $display( "Testing -1 + 1" );
         ctrl = 4'b0000; x = 8'b11111111; y = 8'b00000001;
         #(`CYCLE*0.3)
-        if( out==8'b00000000 && carry==1 ) $display( "    .... passed." );
+        if( out==8'b00000000 && carry==0 ) $display( "    .... passed." );
         else begin
             err_count = err_count+1;
-            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b100000000 );
+            $display( "    .... failed, design(%b%b) != expected(%b)", carry, out, 9'b000000000 );
         end
         #(`HCYCLE)
 

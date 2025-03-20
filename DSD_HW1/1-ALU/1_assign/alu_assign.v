@@ -13,8 +13,8 @@ module alu_assign(
     output       carry;
     output [7:0] out;
 
-    assign {carry, out} = (ctrl == 4'b0000) ? $signed(x) + $signed(y) :
-                          (ctrl == 4'b0001) ? $signed(x) - $signed(y) :
+    assign {carry, out} = (ctrl == 4'b0000) ? {x[7], x[7:0]} + {y[7], y[7:0]} :
+                          (ctrl == 4'b0001) ? {x[7], x[7:0]} - {y[7], y[7:0]} :
                           {1'b0,
                           (ctrl == 4'b0010) ? x & y :
                           (ctrl == 4'b0011) ? x | y :
