@@ -58,7 +58,7 @@ module core(clk,
     assign mem_addr_I  = PC;
 
     always @(*) begin
-        instruction[31:0] = {mem_rdata_I[7:0], mem_rdata_I[15:8], mem_rdata_I[23:16], mem_rdata_I[31:24]}
+        instruction[31:0] = {mem_rdata_I[7:0], mem_rdata_I[15:8], mem_rdata_I[23:16], mem_rdata_I[31:24]};
 
         alu_result  = 0;
         imm         = 0;
@@ -77,10 +77,12 @@ module core(clk,
         funct7 = instruction[31:25];
 
         case (opcode)
-            // R-type instructions: add, sub
+            // R-type instructions: add, sub, and, or
             7'b0110011: begin
                 case (funct7)
-                    7'b0000000: rd_data = (funct3 == 000) ? rs1_data + rs2_data : 0; // ADD
+                    7'b0000000: rd_data = (funct3 == 000) ? rs1_data + rs2_data :    // ADD
+                                          (funct3 == 111) ? rs1_data & rs2_data :    // AND
+                                          (funct3 == 110) ? rs1_data | rs2_data : 0; // OR
                     7'b0100000: rd_data = (funct3 == 000) ? rs1_data - rs2_data : 0; // SUB
                     default: rd_data = 0;
                 endcase
@@ -105,7 +107,7 @@ module core(clk,
                     default: alu_result = 0;
                 endcase
                 addr_D_reg    = alu_result;
-                rd_data[31:0] = {mem_rdata_D[7:0], mem_rdata_D[15:8], mem_rdata_D[23:16], mem_rdata_D[31:24]}
+                rd_data[31:0] = {mem_rdata_D[7:0], mem_rdata_D[15:8], mem_rdata_D[23:16], mem_rdata_D[31:24]};
                 regWrite      = 1;
             end
 
@@ -180,17 +182,17 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
     assign q1 = mem[a1];
     assign q2 = mem[a2];
 
+    integer i;
+
     always @(posedge clk) begin
         if (!rst_n) begin
-            for (integer i = 0; i < 32; i = i + 1) begin
+            for (i=0; i<32; i=i+1)
                 mem[i] <= 0;
-            end
         end
         else begin
             mem[0] <= 0;
-            if (wen && aw != 3'b000) begin
-            mem[RW] <= d;
-            end
+            if (wen && aw != 5'd0)
+                mem[aw] <= d;
         end
     end
 endmodule
