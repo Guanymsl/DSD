@@ -8,7 +8,7 @@ Source:
 
 RTL simulation:
     > vcs RISCV_tb.v +define+RV32I+RTL -full64 -R -debug_access+all +v2k
-    
+
 --------------------------------------------------------------------------
 Files for synthesis:
 - .synopsys_dc.setup
@@ -21,7 +21,7 @@ Synthesis command:
     dc_shell> read_ddc CHIP_syn.ddc
 - Close Design Compiler:
     dc_shell> exit
-    
+
 --------------------------------------------------------------------------
 Post-synthesis simulation:
 - Check if you have a SDF file (CHIP_syn.sdf)

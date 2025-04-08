@@ -46,7 +46,7 @@ set_input_delay  $t_in  -clock CLK [get_ports rst_n]
 #Compile and save files
 #You may modified setting of compile 
 
-compile
+compile_ultra -no_autoungroup
 #####################################################
 set bus_inference_style {%s[%d]}
 set bus_naming_style    {%s[%d]}

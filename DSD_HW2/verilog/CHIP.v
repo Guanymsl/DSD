@@ -5,7 +5,7 @@ module CHIP (
 
 input clk, rst_n;
 // reg         clk, rst_n ;
-    
+
 wire        mem_wen_D  ;
 wire [31:0] mem_addr_D ;
 wire [31:0] mem_wdata_D;
@@ -39,5 +39,5 @@ core core0(
     .mem_addr_I(mem_addr_I),
     .mem_rdata_I(mem_rdata_I)
     );
-    
+
 endmodule

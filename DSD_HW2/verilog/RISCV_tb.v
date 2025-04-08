@@ -26,52 +26,52 @@
 module RISCV_tb;
 
     reg         clk, rst_n ;
-    
+
     wire        mem_wen_D  ;
     wire [31:0] mem_addr_D ;
     wire [31:0] mem_wdata_D;
     wire [31:0] mem_rdata_D;
-    
+
     wire [31:0] mem_addr_I ;
     wire [31:0] mem_rdata_I;
-    
+
     reg  [31:0] mem_data_ans [0:31];
 
     integer i;
-    
+
     integer eof;
     reg eof_find;
 
     integer error_num;
-    
+
     // Note the design is connected at testbench, include:
     // 1. CHIP (RISCV + D_cache + I_chache)
     // 2. memory for data
     // 3. memory for instruction
-    
+
     CHIP chip0(
         clk,
         rst_n);
-       
+
     `ifdef SDF
         initial $sdf_annotate(`SDFFILE, chip0);
     `endif
-    
+
     // Initialize the data memory
     initial begin
-        $fsdbDumpfile("RISCV.fsdb");            
+        $fsdbDumpfile("RISCV.fsdb");
         $fsdbDumpvars(0,RISCV_tb,"+mda");
 
         $display("------------------------------------------------------------\n");
         $display("START!!! Simulation Start .....\n");
         $display("------------------------------------------------------------\n");
-        
+
         clk = 1;
         rst_n = 1'b1;
         #(`CYCLE*2);
         #(0.1) rst_n = 1'b0;
         #(`CYCLE*2) rst_n = 1'b1;
-        
+
         for (i=0; i<32; i=i+1) chip0.mem_D.mem[i]    = 32'h00_00_00_00; // reset data in mem_D
         $readmemh (`DMEM_DATA, chip0.mem_D.mem);                        // initialize data in mem_D
         for (i=0; i<32; i=i+1) mem_data_ans[i] = 32'h00_00_00_00;
@@ -123,7 +123,7 @@ module RISCV_tb;
             $finish;
         end
     end
-        
+
     always #(`CYCLE*0.5) clk = ~clk;
-        
+
 endmodule
