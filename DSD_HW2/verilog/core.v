@@ -25,8 +25,8 @@ module core(clk,
     reg  [31:0] PC, PC_nxt;
     reg         regWrite;
     reg  [ 4:0] rs1, rs2, rd;
-    wire [31:0] rs1_data, rs2_data;
     reg  [31:0] rd_data;
+    wire [31:0] rs1_data, rs2_data;
 
     reg [31:0] instruction;
 
@@ -35,7 +35,7 @@ module core(clk,
     reg [31:0] wdata_D_reg;
 
     reg [31:0] imm;
-    reg [ 6:0] opcode;
+    reg [ 6:0] OP;
     reg [ 2:0] funct3;
     reg [ 6:0] funct7;
 
@@ -57,6 +57,29 @@ module core(clk,
 
     assign {mem_wdata_D[7:0], mem_wdata_D[15:8], mem_wdata_D[23:16], mem_wdata_D[31:24]} = wdata_D_reg[31:0];
 
+    // For ALU
+    wire [3:0]  ALUCtrl;
+    wire [31:0] ALUIn1, ALUIn2;
+    wire [31:0] ALUResult;
+
+    alu alu0(
+        .ctrl(ALUCtrl),
+        .a(ALUIn1),
+        .b(ALUIn2),
+        .out(ALUResult)
+    );
+
+    assign ALUCtrl[0] = OP[4] & funct3[2] & funct3[1] & (!funct3[0]);
+    assign ALUCtrl[1] = !(OP[4] & (!OP[3]) & funct3[1]);
+    assign ALUCtrl[2] = ((!OP[4]) & (!funct3[1])) | (funct7[5] & OP[4]);
+    assign ALUCtrl[3] = OP[4] & (!funct3[2]) & funct3[1];
+
+    assign ALUIn1 = rs1_data;
+    assign ALUIn2 = (OP[4] | OP[6]) ? rs2_data : imm;
+
+    // For PC
+    reg Branch, Jal, Jalr;
+
     always @(*) begin
         instruction[31:0] = {mem_rdata_I[7:0], mem_rdata_I[15:8], mem_rdata_I[23:16], mem_rdata_I[31:24]};
 
@@ -66,54 +89,56 @@ module core(clk,
         wen_D_reg   = 0;
         rd_data     = 0;
         regWrite    = 0;
-        PC_nxt      = PC + 4;
 
-        opcode = instruction[6:0];
+        //For ALU
+        OP     = instruction[6:0];
+        funct3 = instruction[14:12];
+        funct7 = instruction[31:25];
         rs1    = instruction[19:15];
         rs2    = instruction[24:20];
         rd     = instruction[11:7];
-        funct3 = instruction[14:12];
-        funct7 = instruction[30];
 
-        case (opcode)
+        // For PC
+        Branch = 0;
+        Jal    = 0;
+        Jalr   = 0;
+        PC_nxt = (Branch | Jal) ? PC + imm:
+                 (Jalr) ? rs1_data + imm:
+                 PC + 4;
+
+        case (OP)
             // R-type instructions: add, sub, and, or
             7'b0110011: begin
-                case (funct7)
-                    1'b0: rd_data = (funct3 == 3'b000) ? rs1_data + rs2_data :          // ADD
-                                          (funct3 == 3'b111) ? rs1_data & rs2_data :    // AND
-                                          (funct3 == 3'b110) ? rs1_data | rs2_data : 0; // OR
-                    1'b1: rd_data = rs1_data - rs2_data;                                // SUB
-                    default: rd_data = 0;
-                endcase
+                rd_data  = ALUResult;
                 regWrite = 1;
             end
 
             // R-type instructions: slt
             7'b0010011: begin
-                rd_data = ($signed(rs1_data) < $signed(rs2_data)) ? 1 : 0; // SLT
+                rd_data  = ALUResult;
                 regWrite = 1;
             end
 
             // I-type instructions: lw
             7'b0000011: begin
                 imm           = {{20{instruction[31]}}, instruction[31:20]};
-                addr_D_reg    = rs1_data + imm;
+                addr_D_reg    = ALUResult;
                 rd_data[31:0] = {mem_rdata_D[7:0], mem_rdata_D[15:8], mem_rdata_D[23:16], mem_rdata_D[31:24]};
                 regWrite      = 1;
             end
 
             // B-type instructions: beq
             7'b1100011: begin
-                if (rs1_data == rs2_data) begin
-                    imm = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
-                    PC_nxt = PC + imm;
+                if (ALUResult == 0) begin
+                    imm    = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
+                    Branch = 1;
                 end
             end
 
             // S-type instructions: sw
             7'b0100011: begin
                 imm         = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]};
-                addr_D_reg  = rs1_data + imm;
+                addr_D_reg  = ALUResult;
                 wdata_D_reg = rs2_data;
                 wen_D_reg   = 1;
             end
@@ -121,7 +146,7 @@ module core(clk,
             // J-type instructions: jal
             7'b1101111: begin
                 imm      = {{20{instruction[31]}}, instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0};
-                PC_nxt   = PC + imm;
+                Jal      = 1;
                 rd_data  = PC + 4;
                 regWrite = 1;
             end
@@ -129,7 +154,7 @@ module core(clk,
             // I-type instructions: jalr
             7'b1100111: begin
                 imm      = {{20{instruction[31]}}, instruction[31:20]};
-                PC_nxt   = rs1_data + imm;
+                Jalr     = 1;
                 rd_data  = PC + 4;
                 regWrite = 1;
             end
@@ -137,12 +162,10 @@ module core(clk,
     end
 
     always @(posedge clk) begin
-        if (!rst_n) begin
+        if (!rst_n)
             PC <= 32'd0;
-        end
-        else begin
+        else
             PC <= PC_nxt;
-        end
     end
 endmodule
 
@@ -171,4 +194,18 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
                 mem[aw] <= d;
         end
     end
+endmodule
+
+module alu(ctrl, a, b, out);
+    input   [3:0] ctrl;
+    input  [31:0] a;
+    input  [31:0] b;
+    output [31:0] out;
+
+    assign out = (ctrl == 4'b0000) ? a & b :
+                 (ctrl == 4'b0001) ? a | b :
+                 (ctrl == 4'b0010) ? a + b :
+                 (ctrl == 4'b0110) ? a - b :
+                 (ctrl == 4'b1000) ? (($signed(a) < $signed(b)) ? 1 : 0) : 0;
+
 endmodule
