@@ -22,43 +22,47 @@ module core(clk,
     output [31:0] mem_addr_I ;  // the fetching address of next instruction
     input  [31:0] mem_rdata_I;  // instruction reading from I-mem
 
-    reg  [31:0] PC, PC_nxt;
-    reg         regWrite;
-    reg  [ 4:0] rs1, rs2, rd;
-    reg  [31:0] rd_data;
-    wire [31:0] rs1_data, rs2_data;
+    // For PC
+    reg [31:0] PC, PC_nxt;
+    reg        Branch, Jal, Jalr;
 
-    reg [31:0] instruction;
-
+    // For Data Memory
     reg        wen_D_reg;
     reg [31:0] addr_D_reg;
     reg [31:0] wdata_D_reg;
 
-    reg [31:0] imm;
-    reg [ 6:0] OP;
+    assign mem_wen_D  = wen_D_reg;
+    assign mem_addr_D = addr_D_reg;
+    assign mem_addr_I = PC;
+    assign {mem_wdata_D[7:0], mem_wdata_D[15:8], mem_wdata_D[23:16], mem_wdata_D[31:24]} = wdata_D_reg[31:0];
+
+    // For Instruction
+    reg [31:0] instruction;
+    reg [ 6:0] op;
     reg [ 2:0] funct3;
     reg [ 6:0] funct7;
+    reg [ 4:0] rs1, rs2, rd;
+    reg [31:0] imm;
+
+    // For Register File
+    reg         regWrite;
+    reg  [31:0] rd_data;
+    wire [31:0] rs1_data, rs2_data;
 
     reg_file reg0(
         .clk(clk),
         .rst_n(rst_n),
         .wen(regWrite),
-        .a1(rs1),
-        .a2(rs2),
-        .aw(rd),
-        .d(rd_data),
-        .q1(rs1_data),
-        .q2(rs2_data)
+        .RW(rd),
+        .busW(rd_data),
+        .RX(rs1),
+        .RY(rs2),
+        .busX(rs1_data),
+        .busY(rs2_data)
     );
 
-    assign mem_wen_D  = wen_D_reg;
-    assign mem_addr_D = addr_D_reg;
-    assign mem_addr_I = PC;
-
-    assign {mem_wdata_D[7:0], mem_wdata_D[15:8], mem_wdata_D[23:16], mem_wdata_D[31:24]} = wdata_D_reg[31:0];
-
     // For ALU
-    wire [3:0]  ALUCtrl;
+    wire [ 3:0] ALUCtrl;
     wire [31:0] ALUIn1, ALUIn2;
     wire [31:0] ALUResult;
 
@@ -69,16 +73,13 @@ module core(clk,
         .out(ALUResult)
     );
 
-    assign ALUCtrl[0] = OP[4] & funct3[2] & funct3[1] & (!funct3[0]);
-    assign ALUCtrl[1] = !(OP[4] & (!OP[3]) & funct3[1]);
-    assign ALUCtrl[2] = ((!OP[4]) & (!funct3[1])) | (funct7[5] & OP[4]);
-    assign ALUCtrl[3] = OP[4] & (!funct3[2]) & funct3[1];
+    assign ALUCtrl[0] = op[4] & funct3[2] & funct3[1] & (!funct3[0]);
+    assign ALUCtrl[1] = !(op[4] & (!op[3]) & funct3[1]);
+    assign ALUCtrl[2] = ((!op[4]) & (!funct3[1])) | (funct7[5] & op[4]);
+    assign ALUCtrl[3] = op[4] & (!funct3[2]) & funct3[1];
 
     assign ALUIn1 = rs1_data;
-    assign ALUIn2 = (OP[4] | OP[6]) ? rs2_data : imm;
-
-    // For PC
-    reg Branch, Jal, Jalr;
+    assign ALUIn2 = (op[4] | op[6]) ? rs2_data : imm;
 
     always @(*) begin
         instruction[31:0] = {mem_rdata_I[7:0], mem_rdata_I[15:8], mem_rdata_I[23:16], mem_rdata_I[31:24]};
@@ -91,7 +92,7 @@ module core(clk,
         regWrite    = 0;
 
         //For ALU
-        OP     = instruction[6:0];
+        op     = instruction[6:0];
         funct3 = instruction[14:12];
         funct7 = instruction[31:25];
         rs1    = instruction[19:15];
@@ -106,7 +107,7 @@ module core(clk,
                  (Jalr) ? rs1_data + imm:
                  PC + 4;
 
-        case (OP)
+        case (op)
             // R-type instructions: add, sub, and, or
             7'b0110011: begin
                 rd_data  = ALUResult;
@@ -129,7 +130,7 @@ module core(clk,
 
             // B-type instructions: beq
             7'b1100011: begin
-                if (ALUResult == 0) begin
+                if (ALUResult == 32'd0) begin
                     imm    = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
                     Branch = 1;
                 end
@@ -169,17 +170,16 @@ module core(clk,
     end
 endmodule
 
-module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
+module reg_file(clk, rst_n, wen, RW, busW, RX, RY, busX, busY);
     input        clk, rst_n, wen;
-    input [31:0] d;
-    input [4:0]  a1, a2, aw;
-
-    output [31:0] q1, q2;
+    input  [31:0] busW;
+    input  [ 4:0] RW, RX, RY;
+    output [31:0] busX, busY;
 
     reg [31:0] mem [0:31];
 
-    assign q1 = mem[a1];
-    assign q2 = mem[a2];
+    assign busX = mem[RX];
+    assign busY = mem[RY];
 
     integer i;
 
@@ -190,14 +190,14 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
         end
         else begin
             mem[0] <= 0;
-            if (wen && aw != 5'd0)
-                mem[aw] <= d;
+            if (wen && RW != 5'd0)
+                mem[RW] <= busW;
         end
     end
 endmodule
 
 module alu(ctrl, a, b, out);
-    input   [3:0] ctrl;
+    input  [ 3:0] ctrl;
     input  [31:0] a;
     input  [31:0] b;
     output [31:0] out;
@@ -207,5 +207,4 @@ module alu(ctrl, a, b, out);
                  (ctrl == 4'b0010) ? a + b :
                  (ctrl == 4'b0110) ? a - b :
                  (ctrl == 4'b1000) ? (($signed(a) < $signed(b)) ? 1 : 0) : 0;
-
 endmodule
