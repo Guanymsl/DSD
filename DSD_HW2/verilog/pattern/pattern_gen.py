@@ -3,7 +3,7 @@ import random
 class write_pattern(object):
     def __init__(self):
         self.counter = 0
-        
+
     def write_line(self, str_in):
         assert(len(str_in) == 8)
         substr_0 = str_in[0:2]
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     slt_result = '{:x}'.format(x < y).zfill(8).upper()
     add_result = '{:x}'.format(x + x).zfill(8).upper()
     sub_result = '{:x}'.format(2*x - x).zfill(8).upper()
-    
+
     with open('data.txt', 'w') as f_data:
         data = write_pattern()
         f_data.write(data.write_line(data1) + '\n')
