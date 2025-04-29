@@ -22,20 +22,6 @@ module core(clk,
     output [31:0] mem_addr_I ;  // the fetching address of next instruction
     input  [31:0] mem_rdata_I;  // instruction reading from I-mem
 
-    // For PC
-    reg [31:0] PC, PC_nxt;
-    reg        Branch, Jal, Jalr;
-
-    // For Data Memory
-    reg        wen_D_reg;
-    reg [31:0] addr_D_reg;
-    reg [31:0] wdata_D_reg;
-
-    assign mem_wen_D  = wen_D_reg;
-    assign mem_addr_D = addr_D_reg;
-    assign mem_addr_I = PC;
-    assign {mem_wdata_D[7:0], mem_wdata_D[15:8], mem_wdata_D[23:16], mem_wdata_D[31:24]} = wdata_D_reg[31:0];
-
     // For Instruction
     reg [31:0] instruction;
     reg [ 6:0] op;
@@ -60,6 +46,25 @@ module core(clk,
         .busX(rs1_data),
         .busY(rs2_data)
     );
+
+    // For PC
+    reg  [31:0] PC;
+    wire [31:0] PC_nxt;
+    reg         Branch, Jal, Jalr;
+
+    assign PC_nxt = (Branch | Jal) ? PC + imm:
+                    (Jalr) ? rs1_data + imm:
+                    PC + 4;
+
+    // For Data Memory
+    reg        wen_D_reg;
+    reg [31:0] addr_D_reg;
+    reg [31:0] wdata_D_reg;
+
+    assign mem_wen_D  = wen_D_reg;
+    assign mem_addr_D = addr_D_reg;
+    assign mem_addr_I = PC;
+    assign {mem_wdata_D[7:0], mem_wdata_D[15:8], mem_wdata_D[23:16], mem_wdata_D[31:24]} = wdata_D_reg[31:0];
 
     // For ALU
     wire [ 3:0] ALUCtrl;
@@ -157,10 +162,6 @@ module core(clk,
                 regWrite = 1;
             end
         endcase
-
-        PC_nxt = (Branch | Jal) ? PC + imm:
-                 (Jalr) ? rs1_data + imm:
-                 PC + 4;
     end
 
     always @(posedge clk) begin
