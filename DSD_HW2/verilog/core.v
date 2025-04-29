@@ -103,9 +103,6 @@ module core(clk,
         Branch = 0;
         Jal    = 0;
         Jalr   = 0;
-        PC_nxt = (Branch | Jal) ? PC + imm:
-                 (Jalr) ? rs1_data + imm:
-                 PC + 4;
 
         case (op)
             // R-type instructions: add, sub, and, or
@@ -160,6 +157,10 @@ module core(clk,
                 regWrite = 1;
             end
         endcase
+
+        PC_nxt = (Branch | Jal) ? PC + imm:
+                 (Jalr) ? rs1_data + imm:
+                 PC + 4;
     end
 
     always @(posedge clk) begin
