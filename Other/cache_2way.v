@@ -15,7 +15,7 @@ module cache(
     mem_ready,
     state
 );
-    
+
 //==== input/output definition ============================
     input          clk;
     // processor interface
@@ -31,7 +31,7 @@ module cache(
     output reg    mem_read, mem_write;
     output reg [27:0] mem_addr;
     output reg [127:0] mem_wdata;
-    
+
     output reg [1:0] state;
 
     localparam COMP = 0, ALLC = 1, WB = 2;
@@ -161,25 +161,25 @@ always@(*) begin
         2'd0:begin
                 if(state_r == ALLC && mem_ready)
                 cache_w[block_num] = {1'b1, 1'b1, tag, mem_rdata[127:32], proc_wdata};
-                else if(hit) 
+                else if(hit)
                 cache_w[block_num] = {1'b1, 1'b1, tag, cache[block_num][127:32], proc_wdata};
         end
         2'd1:begin
                 if(state_r == ALLC && mem_ready)
                 cache_w[block_num] = {1'b1, 1'b1, tag, mem_rdata[127:64], proc_wdata, mem_rdata[31:0]};
-                else if(hit) 
+                else if(hit)
                 cache_w[block_num] = {1'b1, 1'b1, tag, cache[block_num][127:64], proc_wdata, cache[block_num][31:0]};
         end
         2'd2:begin
                 if(state_r == ALLC && mem_ready)
                 cache_w[block_num] = {1'b1, 1'b1, tag, mem_rdata[127:96], proc_wdata, mem_rdata[63:0]};
-                else if(hit) 
+                else if(hit)
                 cache_w[block_num] = {1'b1, 1'b1, tag, cache[block_num][127:96], proc_wdata, cache[block_num][63:0]};
         end
         2'd3:begin
                 if(state_r == ALLC && mem_ready)
                 cache_w[block_num] = {1'b1, 1'b1, tag, proc_wdata, mem_rdata[95:0]};
-                else if(hit) 
+                else if(hit)
                 cache_w[block_num] = {1'b1, 1'b1, tag, proc_wdata, cache[block_num][95:0]};
         end
         endcase

@@ -14,7 +14,7 @@ module cache(
     mem_wdata,
     mem_ready
 );
-    
+
 //==== input/output definition ============================
     input          clk;
     // processor interface
@@ -30,18 +30,18 @@ module cache(
     output         mem_read, mem_write;
     output  [27:0] mem_addr;
     output [127:0] mem_wdata;
-    
+
 //==== wire/reg definition ================================
-    
+
 //==== combinational circuit ==============================
 
 //==== sequential circuit =================================
 always@( posedge clk ) begin
     if( proc_reset ) begin
-    
+
     end
     else begin
-    
+
     end
 end
 

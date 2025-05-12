@@ -3,7 +3,7 @@ module alu_always(
     x,
     y,
     zero,
-    out 
+    out
 );
     input  [3:0]        ctrl;
     input  [31:0]        x;
@@ -51,7 +51,7 @@ module core(clk,
     // for mem_I
     output reg [31:0] mem_addr_I ;  // the fetching address of next instruction, unit: byte
     input  [31:0] mem_rdata_I;  // instruction reading from I-mem
-    
+
     reg [31:0] PC;
     reg [31:0] next_PC;
     wire [31:0] instruction; //the current instruction
