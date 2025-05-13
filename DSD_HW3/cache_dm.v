@@ -38,7 +38,7 @@ localparam S_REFILL = 2'd2;
 
 reg [1:0] state_r, state_w;
 
-// Single cache array: { valid(1), dirty(1), tag(24), data(128) }
+// Single cache array: { valid(1), dirty(1), tag(25), data(128) }
 // [154] = valid, [153] = dirty, [152:128] = tag, [127:0] = data
 reg [154:0] cache_r [0:7];
 reg [154:0] cache_w [0:7];
