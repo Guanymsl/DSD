@@ -60,21 +60,21 @@ assign dirty = cache_r[req_index][153];
 assign tag   = cache_r[req_index][152:128];
 
 assign hit        = (valid && tag == req_tag);
-assign proc_stall = (state_r != S_IDLE);
+assign proc_stall = ~hit;
 
 integer i;
 
 //==== combinational circuit ==============================
 always @(*) begin
     state_w = state_r;
-    case (state_r) // synopsys parallel_case full_case
+    case (state_r)
         S_IDLE: begin
             if (proc_read || proc_write) state_w = S_LOOKUP;
         end
         S_LOOKUP: begin
             if (hit) begin
                 state_w = S_IDLE;
-            end else if (valid && dirty) begin
+            end else if (dirty) begin
                 state_w = S_WB;
             end else begin
                 state_w = S_REFILL;
@@ -90,10 +90,16 @@ always @(*) begin
 end
 
 always @(*) begin
+    mem_read  = 1'b0;
+    mem_write = 1'b0;
+    proc_rdata = 32'd0;
+    mem_wdata = 128'd0;
+    mem_addr  = 28'd0;
+
     for (i = 0; i < 8; i = i + 1)
         cache_w[i] = cache_r[i];
 
-    case (state_r) // synopsys parallel_case full_case
+    case (state_r)
         S_LOOKUP: begin
             if (hit) begin
                 if (proc_read) begin
@@ -102,17 +108,16 @@ always @(*) begin
                 if (proc_write) begin
                     cache_w[req_index][(req_offset * 32)+:32] = proc_wdata;
                     cache_w[req_index][153] = 1'b1;
-                    proc_rdata = proc_wdata;
                 end
             end
         end
         S_WB: begin
-            mem_write = 1'b1;
+            if (~mem_ready) mem_write = 1;
             mem_addr  = {cache_r[req_index][152:128], req_index};
             mem_wdata = cache_r[req_index][127:0];
         end
         S_REFILL: begin
-            mem_read = 1'b1;
+            if (~mem_ready) mem_read = 1;
             mem_addr = req_tag;
             if (mem_ready) begin
                 cache_w[req_index] = {1'b1, 1'b0, req_tag, mem_rdata};
