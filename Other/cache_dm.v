@@ -13,7 +13,6 @@ module cache(
     mem_rdata,
     mem_wdata,
     mem_ready,
-    state
 );
 
 //==== input/output definition ============================
@@ -31,8 +30,6 @@ module cache(
     output reg    mem_read, mem_write;
     output reg [27:0] mem_addr;
     output reg [127:0] mem_wdata;
-
-    output reg [1:0] state;
 
     localparam COMP = 0, ALLC = 1, WB = 2;
     integer i;
@@ -55,7 +52,6 @@ module cache(
     assign proc_stall = ~hit;
 //FSM
 always@(*) begin
-    state = state_r;
     case(state_r) // synopsys parallel_case full_case
     COMP: begin
         if(~proc_write & ~proc_read) state_w = COMP;
