@@ -138,6 +138,12 @@ always @(*) begin
         end
     endcase
 
+    if (hit0) begin
+        lru_w[req_set] = 1;
+    end else if (hit1) begin
+        lru_w[req_set] = 0;
+    end
+
     if (proc_write) begin
         if (hit0) begin
             case (req_offset)
@@ -146,7 +152,6 @@ always @(*) begin
                 2'd2: cache_w0[req_set] = {1'b1, 1'b1, req_tag, cache_r0[req_set][127:96], proc_wdata, cache_r0[req_set][63:0]};
                 2'd3: cache_w0[req_set] = {1'b1, 1'b1, req_tag, proc_wdata, cache_r0[req_set][95:0]};
             endcase
-            lru_w[req_set] = 1;
         end else if (hit1) begin
             case (req_offset)
                 2'd0: cache_w1[req_set] = {1'b1, 1'b1, req_tag, cache_r1[req_set][127:32], proc_wdata};
@@ -154,7 +159,6 @@ always @(*) begin
                 2'd2: cache_w1[req_set] = {1'b1, 1'b1, req_tag, cache_r1[req_set][127:96], proc_wdata, cache_r1[req_set][63:0]};
                 2'd3: cache_w1[req_set] = {1'b1, 1'b1, req_tag, proc_wdata, cache_r1[req_set][95:0]};
             endcase
-            lru_w[req_set] = 0;
         end
     end
 end
