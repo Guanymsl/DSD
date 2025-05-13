@@ -46,11 +46,11 @@ reg [154:0] cache_w [0:7];
 
 wire [24:0] req_tag;
 wire [ 2:0] req_index;
-wire [ 6:0] req_offset;
+wire [ 1:0] req_offset;
 
 assign req_tag    = proc_addr[29:5];
 assign req_index  = proc_addr[4:2];
-assign req_offset = {5'd0, proc_addr[1:0]};
+assign req_offset = proc_addr[1:0];
 
 wire valid, dirty, hit;
 wire [24:0] tag;
@@ -63,6 +63,16 @@ assign hit        = (valid && tag == req_tag);
 assign proc_stall = ~hit;
 
 integer i;
+
+function [31:0] get_data;
+    input [154:0] block;
+    input [  1:0] offset;
+    begin
+        get_data = (offset == 2'd0) ? block[31:0] :
+                   (offset == 2'd1) ? block[63:32] :
+                   (offset == 2'd2) ? block[95:64] : block[127:96];
+    end
+endfunction
 
 //==== combinational circuit ==============================
 always @(*) begin
@@ -90,45 +100,36 @@ always @(*) begin
 end
 
 always @(*) begin
-    mem_read   = 1'b0;
-    mem_write  = 1'b0;
-    proc_rdata = 32'd0;
-    mem_wdata  = 128'd0;
-    mem_addr   = 28'd0;
     for (i = 0; i < 8; i = i + 1) begin
         cache_w[i] = cache_r[i];
     end
 
+    mem_read   = 1'b0;
+    mem_write  = 1'b0;
+
+    mem_addr   = proc_addr[29:2];
+    proc_rdata = get_data(cache_r[req_index], req_offset);
+    mem_wdata  = cache_r[req_index][127:0];
+
     case (state_r)
         S_LOOKUP: begin
-            if (hit) begin
-                if (proc_read) begin
-                    proc_rdata = cache_r[req_index][(req_offset << 5)+:32];
-                end
-                if (proc_write) begin
-                    cache_w[req_index][(req_offset << 5)+:32] = proc_wdata;
-                    cache_w[req_index][153] = 1'b1;
-                end
+            if (hit && proc_write) begin
+                case (req_offset)
+                    2'd0: cache_w[req_index] = {1'b1, 1'b1, tag, cache_r[req_index][127:32], proc_wdata};
+                    2'd1: cache_w[req_index] = {1'b1, 1'b1, tag, cache_r[req_index][127:64], proc_wdata, cache_r[req_index][31:0]};
+                    2'd2: cache_w[req_index] = {1'b1, 1'b1, tag, cache_r[req_index][127:96], proc_wdata, cache_r[req_index][63:0]};
+                    2'd3: cache_w[req_index] = {1'b1, 1'b1, tag, proc_wdata, cache_r[req_index][95:0]};
+                endcase
+                proc_rdata = proc_wdata;
             end
         end
         S_WB: begin
             if (~mem_ready) mem_write = 1;
-            mem_addr  = {cache_r[req_index][152:128], req_index};
-            mem_wdata = cache_r[req_index][127:0];
+            mem_addr = {cache_r[req_index][152:128], req_index};
         end
         S_REFILL: begin
             if (~mem_ready) mem_read = 1;
-            mem_addr = req_tag;
-            if (mem_ready) begin
-                cache_w[req_index] = {1'b1, 1'b0, req_tag, mem_rdata};
-                if (proc_write) begin
-                    cache_w[req_index][(req_offset << 5)+:32] = proc_wdata;
-                    cache_w[req_index][153] = 1'b1;
-                    proc_rdata = proc_wdata;
-                end else begin
-                    proc_rdata = cache_w[req_index][(req_offset << 5)+:32];
-                end
-            end
+            if (mem_ready) cache_w[req_index] = {1'b1, 1'b0, req_tag, mem_rdata};
         end
     endcase
 end
