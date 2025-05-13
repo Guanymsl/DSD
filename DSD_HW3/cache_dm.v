@@ -46,11 +46,11 @@ reg [154:0] cache_w [0:7];
 
 wire [24:0] req_tag;
 wire [ 2:0] req_index;
-wire [ 1:0] req_offset;
+wire [ 6:0] req_offset;
 
 assign req_tag    = proc_addr[29:5];
 assign req_index  = proc_addr[4:2];
-assign req_offset = proc_addr[1:0];
+assign req_offset = {5'd0, proc_addr[1:0]};
 
 wire valid, dirty, hit;
 wire [24:0] tag;
@@ -90,23 +90,23 @@ always @(*) begin
 end
 
 always @(*) begin
-    mem_read  = 1'b0;
-    mem_write = 1'b0;
+    mem_read   = 1'b0;
+    mem_write  = 1'b0;
     proc_rdata = 32'd0;
-    mem_wdata = 128'd0;
-    mem_addr  = 28'd0;
-
-    for (i = 0; i < 8; i = i + 1)
+    mem_wdata  = 128'd0;
+    mem_addr   = 28'd0;
+    for (i = 0; i < 8; i = i + 1) begin
         cache_w[i] = cache_r[i];
+    end
 
     case (state_r)
         S_LOOKUP: begin
             if (hit) begin
                 if (proc_read) begin
-                    proc_rdata = cache_r[req_index][(req_offset * 32)+:32];
+                    proc_rdata = cache_r[req_index][(req_offset << 5)+:32];
                 end
                 if (proc_write) begin
-                    cache_w[req_index][(req_offset * 32)+:32] = proc_wdata;
+                    cache_w[req_index][(req_offset << 5)+:32] = proc_wdata;
                     cache_w[req_index][153] = 1'b1;
                 end
             end
@@ -122,11 +122,11 @@ always @(*) begin
             if (mem_ready) begin
                 cache_w[req_index] = {1'b1, 1'b0, req_tag, mem_rdata};
                 if (proc_write) begin
-                    cache_w[req_index][(req_offset * 32)+:32] = proc_wdata;
+                    cache_w[req_index][(req_offset << 5)+:32] = proc_wdata;
                     cache_w[req_index][153] = 1'b1;
                     proc_rdata = proc_wdata;
                 end else begin
-                    proc_rdata = cache_w[req_index][(req_offset * 32)+:32];
+                    proc_rdata = cache_w[req_index][(req_offset << 5)+:32];
                 end
             end
         end
@@ -137,12 +137,14 @@ end
 always @(posedge clk) begin
     if (proc_reset) begin
         state_r <= S_IDLE;
-        for (i = 0; i < 8; i = i + 1)
+        for (i = 0; i < 8; i = i + 1) begin
             cache_r[i] <= 155'd0;
+        end
     end else begin
         state_r <= state_w;
-        for (i = 0; i < 8; i = i + 1)
+        for (i = 0; i < 8; i = i + 1) begin
             cache_r[i] <= cache_w[i];
+        end
     end
 end
 
