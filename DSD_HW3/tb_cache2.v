@@ -2,8 +2,9 @@
 // Testbench for Direct-Mapped Cache
 
 `timescale 1 ns/10 ps
-`define CYCLE       6.0                // Modify cycle time here 6 for dm 8 for 2way
+`define CYCLE       6.0                           // Modify cycle time here 6 for dm 8 for 2way
 `define SDFFILE    "./Netlist/cache_dm_syn.sdf"   // Modify your sdf file name
+// `define SDFFILE    "./Netlist/cache_2way_syn.sdf"
 
 `define OUTPUT_DELAY    0.3
 `define INPUT_DELAY     0.3
@@ -12,7 +13,7 @@ module tb_cache;
 
     parameter MEM_NUM = 256;
     parameter MEM_WIDTH = 128;
-    
+
     reg             clk;
     reg             proc_reset;
     reg             proc_read;
@@ -21,7 +22,6 @@ module tb_cache;
     reg     [31:0]  proc_wdata;
     wire    [31:0]  proc_rdata;
     wire            proc_stall;
-    wire [1:0] state;
 
     wire                    mem_ready;
     wire                    mem_read;
@@ -34,7 +34,7 @@ module tb_cache;
     reg hit_or_miss_2 [0:MEM_NUM*4-1];
     reg hit_or_miss_3 [0:MEM_NUM*4-1];
 
-    integer i, k, error, h, x, y, j;
+    integer i, k, error, h, x, y, j, cnt;
 
     memory u_mem (
         .clk        (clk)       ,
@@ -74,7 +74,7 @@ module tb_cache;
         //$fsdbDumpfile( "cache.fsdb" );
         //$fsdbDumpvars(0,tb_cache, "+mda");
     end
-    
+
     // abort if the design cannot halt
     initial begin
         #(`CYCLE * 100000 );
@@ -84,22 +84,22 @@ module tb_cache;
         $display( "\n" );
         $finish;
     end
-    
+
     // clock
     initial begin
         #(`CYCLE*1 );
         clk = 1'b0;
         forever #(`CYCLE * 0.5) clk = ~clk;
     end
-    
+
     // memory initialization
     initial begin
         for( i=0; i<MEM_NUM*4; i=i+1 ) begin
-            u_mem.mem[i]  = i; 
+            u_mem.mem[i]  = i;
         end
         $display("Memory has been initialized.\n");
     end
-    
+
     initial begin
         //initialization
         for( j = 0; j < MEM_NUM*4; j=j+1 )begin
@@ -129,7 +129,6 @@ module tb_cache;
             proc_write = 1'b0;
             proc_addr = k[29:0];
             #(`CYCLE - `OUTPUT_DELAY - `INPUT_DELAY);
-            $display("state: %b, memory ready: %b, memory_interface, memory_read: %b, memory_write: %b, memory_address: %d", state, mem_ready, mem_read, mem_write, mem_addr);
             if( ~proc_stall ) begin
                 if( proc_rdata !== k[31:0] ) begin
                     error = error+1;
@@ -161,10 +160,10 @@ module tb_cache;
             #(`OUTPUT_DELAY);
         end
         $display( "    Finish writing!\n" );
-        
+
         $display( "Processor: Read new data from memory." );
         // read the first 64 addresses in the order of 0, 32, 1, 33, 2, 34, ..., 30, 62, 31, 63
-        // read the next 64 addresses in the order of 64, 96, 65, 97, 66, 98, ..., 94, 126, 95, 127 
+        // read the next 64 addresses in the order of 64, 96, 65, 97, 66, 98, ..., 94, 126, 95, 127
         // and so on
         for (x=0; x<((MEM_NUM*4)/64); x=x+1) begin
             for (y=0; y<64; y=y) begin
@@ -195,31 +194,39 @@ module tb_cache;
             end
         end
 
-        done = 1;
         if(error==0) $display( "    Done correctly so far! ^_^ \n" );
         else         $display( "    Total %d errors detected so far! >\"< \n", error[14:0] );
-        
+
         #(`CYCLE*4);
         if( error != 0 ) $display( "==== SORRY! There are %d errors. ====\n", error[14:0] );
         else $display( "==== CONGRATULATIONS! Pass cache read-write-read test. ====\n" );
         $display( "Finished all operations at:  ", $time, " ns" );
-        
+
         #(`CYCLE * 10 );
         $display( "Exit testbench simulation at:", $time, " ns" );
         $display( "\n" );
 
-        $display("Hit or miss 1:");
-        for(i = 0; i < MEM_NUM*4; i = i + 1) $write("%b", hit_or_miss_1[i]);
-        $display("Hit or miss 2:");
-        for(i = 0; i < MEM_NUM*4; i = i + 1) $write("%b", hit_or_miss_2[i]);
-        $display("Hit or miss 3:");
-        for(i = 0; i < MEM_NUM*4; i = i + 1) $write("%b", hit_or_miss_3[i]);
-        $display("Stall cycle 1:");
-        for(i = 0; i < MEM_NUM*4; i = i + 1) $write("%d", stall_cycle_1[i]);
-        $display("Stall cycle 2:");
-        for(i = 0; i < MEM_NUM*4; i = i + 1) $write("%d", stall_cycle_2[i]);
-        $display("Stall cycle 3:");
-        for(i = 0; i < MEM_NUM*4; i = i + 1) $write("%d", stall_cycle_3[i]);
+        cnt = 0;
+        for(i = 0; i < MEM_NUM*4; i = i + 1) begin
+            if(hit_or_miss_1[i] == 0) begin
+                cnt = cnt + 1;
+            end
+        end
+        $display("Miss Count for State 1: %d", cnt);
+        cnt = 0;
+        for(i = 0; i < MEM_NUM*4; i = i + 1) begin
+            if(hit_or_miss_2[i] == 0) begin
+                cnt = cnt + 1;
+            end
+        end
+        $display("Miss Count for State 2: %d", cnt);
+        cnt = 0;
+        for(i = 0; i < MEM_NUM*4; i = i + 1) begin
+            if(hit_or_miss_3[i] == 0) begin
+                cnt = cnt + 1;
+            end
+        end
+        $display("Miss Count for State 3: %d", cnt);
         $finish;
     end
 

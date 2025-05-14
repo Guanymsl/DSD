@@ -3,7 +3,7 @@
 
 `timescale 1 ns/10 ps
 `define CYCLE       10.0                // Modify cycle time here
-`define SDFFILE    "./cache_syn.sdf"   // Modify your sdf file name
+`define SDFFILE    "./Netlist/cache_2way_syn.sdf"   // Modify your sdf file name
 
 `define OUTPUT_DELAY    0.3
 `define INPUT_DELAY     0.3
