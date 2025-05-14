@@ -12,7 +12,9 @@ module cache(
     mem_addr,
     mem_rdata,
     mem_wdata,
-    mem_ready
+    mem_ready,
+    stall_count,
+    exec_count
 );
 
 //==== input/output definition ============================
@@ -30,6 +32,8 @@ module cache(
     output reg         mem_read, mem_write;
     output reg [ 27:0] mem_addr;
     output reg [127:0] mem_wdata;
+    output reg [ 31:0] stall_count;
+    output reg [ 31:0] exec_count;
 
 //==== wire/reg definition ================================
 localparam S_LOOKUP = 2'd0;
@@ -121,11 +125,17 @@ end
 always @(posedge clk) begin
     if (proc_reset) begin
         state_r <= S_LOOKUP;
+        stall_count  <= 32'd0;
+        exec_count   <= 32'd0;
         for (i = 0; i < 8; i = i + 1) begin
             cache_r[i] <= 155'd0;
         end
     end else begin
         state_r <= state_w;
+        if (proc_stall)
+            stall_count <= stall_count + 1;
+        else
+            exec_count <= exec_count + 1;
         for (i = 0; i < 8; i = i + 1) begin
             cache_r[i] <= cache_w[i];
         end

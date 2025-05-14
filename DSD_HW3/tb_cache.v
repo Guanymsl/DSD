@@ -21,6 +21,11 @@ module tb_cache;
     reg     [31:0]  proc_wdata;
     wire    [31:0]  proc_rdata;
     wire            proc_stall;
+    wire    [31:0]  stall_count;
+    wire    [31:0]  exec_count;
+
+    reg [31:0] temp1, temp2;
+    reg [31:0] temp3, temp4;
 
     wire                    mem_ready;
     wire                    mem_read;
@@ -55,7 +60,9 @@ module tb_cache;
         .mem_addr   (mem_addr)  ,
         .mem_wdata  (mem_wdata) ,
         .mem_rdata  (mem_rdata) ,
-        .mem_ready  (mem_ready)
+        .mem_ready  (mem_ready) ,
+        .stall_count(stall_count) ,
+        .exec_count (exec_count)
     );
 
     `ifdef SDF
@@ -107,6 +114,9 @@ module tb_cache;
         proc_reset = 1'b0;
         #(`CYCLE*0.5 );
 
+        temp1 = stall_count;
+        temp3 = exec_count;
+
         $display( "Processor: Read initial data from memory." );
         // read sequentially from address 0 to address 1023
         for( k=0; k<MEM_NUM*4; k=k) begin
@@ -124,8 +134,15 @@ module tb_cache;
             end
             #(`OUTPUT_DELAY);
         end
+        temp2 = stall_count;
+        temp4 = exec_count;
+        $display( "stall count = %d", temp2 - temp1);
+        $display( "exec count = %d", temp4 - temp3);
         if(error==0) $display( "    Done correctly so far! ^_^\n" );
         else         $display( "    Total %d errors detected so far! >\"<\n", error[14:0] );
+
+        temp1 = stall_count;
+        temp3 = exec_count;
 
         $display( "Processor: Write new data to memory." );
         // write sequentially from address 0 to address 1023
@@ -139,7 +156,14 @@ module tb_cache;
             if( ~proc_stall ) k = k+1;
             #(`OUTPUT_DELAY);
         end
+        temp2 = stall_count;
+        temp4 = exec_count;
+        $display( "stall count = %d", temp2 - temp1);
+        $display( "exec count = %d", temp4 - temp3);
         $display( "    Finish writing!\n" );
+
+        temp1 = stall_count;
+        temp3 = exec_count;
 
         $display( "Processor: Read new data from memory." );
         // read the first 64 addresses in the order of 0, 32, 1, 33, 2, 34, ..., 30, 62, 31, 63
@@ -170,6 +194,10 @@ module tb_cache;
                 else #(`OUTPUT_DELAY);
             end
         end
+        temp2 = stall_count;
+        temp4 = exec_count;
+        $display( "stall count = %d", temp2 - temp1);
+        $display( "exec count = %d", temp4 - temp3);
         if(error==0) $display( "    Done correctly so far! ^_^ \n" );
         else         $display( "    Total %d errors detected so far! >\"< \n", error[14:0] );
 
